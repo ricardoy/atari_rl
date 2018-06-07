@@ -6,12 +6,16 @@
 \usepackage[brazil]{babel}
 \usepackage[latin1]{inputenc}
 \usepackage{beamercolorthemecrane}
+\usepackage{animate}
+
+\usepackage{xmpmulti}
 
 %\logo{\includegraphics[scale=0.2]{logo.png}}
 %\logo{teste}
 
 \title{Aprendizagem por reforço com redes neurais}
-\author{Ricardo Yamamoto Abe}
+\author{Ricardo Yamamoto Abe \\ ricardoy@ime.usp.br}
+
 \date{11 de junho de 2018}
 
 \begin{document}
@@ -26,545 +30,290 @@
 \tableofcontents
 \end{frame}
 
+
 \section{Introdução}
 
-\frame 
-{
+\subsection{Objetivo}
+
+\frame{
   \frametitle{Objetivo}
   
+  \begin{block}{}
+    \begin{center}
+      Treinar um agente capaz de vencer algum jogo de Atari 2600
+    \end{center}
+  \end{block}
+}
+
+\subsection{Q-Learning}
+
+\frame {
+  \frametitle{Q-Learning}
+  
+  Algoritmo de aprendizagem por reforço. Dados um agente, um conjunto
+  de estados $S$, um conjunto de ações $A$, temos:
+
+  \begin{itemize}
+    \item A partir de um estado $s \in S$, agente executa uma ação $a
+      \in A$.
+    \item Uma recompensa (valor numérico) é dada ao agente após cada
+      ação.
+  \end{itemize}
+  
+}
+
+\frame {
+  \frametitle{Q-Learning}
+  
+  Definimos uma função $Q : S \times A \rightarrow R$. O algoritmo baseia-se em
+  iteração de valores:
 
   \begin{block}{}
-  Dado um documento (ex. notícia), queremos encontrar documentos
-  relacionados para oferecer ao usuário. 
-
-
-  Hipótese de trabalho: apenas o conteúdo da coleção poderá ser
-  utilizado no processamento.
+    \begin{equation*}
+      Q(s_t, a_t) \leftarrow (1 - \alpha)Q(s_t, a_t) + \alpha(r_t + \gamma \max_{a'}Q(s_{t+1}, a'))
+    \end{equation*}
   \end{block}
+  
+  Onde $\alpha$ é a taxa de aprendizagem e $\gamma$ é o fator de
+  desconto (determina o quão importante são as recompensas futuras).
+}
+
+\frame {
+  \frametitle{Q-Learning}
+
+  Após convergência, a função ótima $Q^{*}(s, a)$ é encontrada.
+}
+
+\subsection{Problema}
+
+\frame {
+  \frametitle{Problema}
+
+  Função $Q^{*}(s,a)$ é estimada para cada par (estado, ação). Se o
+  total de ações e estados for suficientemente grande, ou se o domínio
+  do conjunto de estados contiver valores reais, tal abordagem
+  torna-se impraticável.
+  
+}
+
+
+\subsection{Solução}
+
+\frame {
+  \frametitle{Solução}
+
+  Utilizar uma função de aproximação:
+
+  \begin{block}{}
+    \begin{equation*}
+      Q(s,a,\theta) \approx Q^{*}(s,a)
+    \end{equation*}
+  \end{block}
+}
+
+\frame {
+  \frametitle{Solução}
+
+  Usar redes neurais como função de aproximação é uma boa idéia?
 
 }
 
-\section{Players}
+\section{Redes Neurais}
 
-\frame
-{
-  \frametitle{Players}
+\subsection{Dificuldade}
+
+\frame {
+  \frametitle{Dificuldades}
+
+  Segundo \cite{baird}, \emph{Q-Learning} pode não convergir de
+  maneira apropriada quando implementado sobre sistemas generalizados
+  de aproximações de funções, como é o caso de redes neurais com
+  ativação não-linear.
+    
+  \begin{itemize}
+    \item Sucessão de sequências não são independentes.
+    \item Pequenas alterações nos Q-valores podem fazer a política
+      oscilar muito.
+  \end{itemize}
+
+}
+
+\subsection{Propostas de melhorias}
+
+\frame {
+  \frametitle{Proposta de melhoria}
 
   \begin{itemize}
-    \item Estadão -- \textit{tags} geradas pelos jornalistas.
-    %\item Folha -- recomendações atribuídas na publicação da notícia.
-    \item Google News -- \textit{clustering}.
-    %\item CNN -- baseado nas páginas que o usuário já navegou.
-    \item Wordpress (\textit{plugins})
-      \begin{itemize}
-        \item \textit{Related Entries} -- busca pelos tokens do título.
-        \item \textit{Similar Posts} -- dispara um busca sobre os $n$
-          tokens mais relevantes dentre título, conteúdo e
-          \textit{tags}.
-      \end{itemize}
+    \item Em \cite{dqn}, foi proposto um modelo de memória de repetição de
+      experiências que, em conjunto com aprendizagem em lote numa rede
+      neural convolucional, alcançou o estado da arte em 7 jogos de Atari
+      2600.
+    \item Falar de \emph{freeze target}
+  \end{itemize}
+
+}
+
+\subsection{Repetição de experiência}
+
+\frame{
+  \frametitle{Repetição de experiência}
+  
+  \begin{itemize}
+  \item Experiência do agente: tupla $(s_t, a_t, r_t, s_{t+1})$.
+  \item Armazenar as tuplas em uma base $D$, chamada memória para repetições.
+  \item Durante o treinamento, amostras de $D$ são utilizadas para
+    construção do lote utilizado na atualização dos pesos.
   \end{itemize}
 }
 
-\section{Modelos de recomendação}
+\frame{
+  \frametitle{Vantagens}
+
+  \begin{itemize}
+  \item Uso mais eficiente dos dados.
+  \item Previne aprendizagem com dados fortemente correlacionados.
+  \item Suaviza o aprendizado ao agregar dados de várias tuplas
+    anteriormente observadas, tornando a distribuição dos
+    comportamentos de entrada menos enviesados.
+  \end{itemize}
+}
+
+\section{Solução implementada}
+
+\subsection{Descrição do agente}
+
+\frame{
+  \frametitle{Descrição do agente}
+
+  Foi utilizada a biblioteca OpenAI-gym. Ela contém ferramentas para
+  implementação e comparação de vários problemas de aprendizagem por
+  reforço.
+
+}
+
+\frame{
+  \frametitle{Descrição do agente}
+
+  Especificamente para Atari 2600:
+
+  \begin{itemize}
+  \item Encapsula o emulador Stella.
+  \item Para cada jogo, é responsável pela entrada e saída de dados,
+    além da geração das recompensas.
+  \item Controle de \emph{Frame-skip}: cada ação é executada por 3, 4
+    ou 5 \emph{frames}.
+  \end{itemize}
+}
+
+\subsection{Implementação}
+
+\frame{
+  \frametitle{Estrutura da solução}
+  
+  \begin{enumerate}
+  \item Dados de entrada: RAM do Atari 2600 (trivia: qual o tamanho?).
+  \item Rede neural com ativação não-linear como aproximação para
+    $Q^{*}(s,a)$.
+  \item Atualizações em lote com repetição de experiência.
+  \end{enumerate}
+}
 
 \frame{ 
+  \frametitle{Estrutura da rede neural}
 
-  Encontramos duas formas de resolver o problema: 
-
-  \begin{itemize}
-
-  \item Construção de consultas baseadas no documento inicial.
-  \item Cálculo de distância entre documentos e posterior
-    agrupamento. (\textit{Clustering})
-
-  \end{itemize}
-
-}
-
-\subsection{Construção de consultas}
-
-\frame
-{
-  \frametitle{Construção de consultas}
-
-  Dado um documento construímos uma consulta a ser realizada em um
-  sistema de RI.
-
-  Dos resultados obtidos, supomos que os $n$ primeiros documentos são
-  relacionados ao documento original.
+  \begin{enumerate}
+  \item \emph{inputLayer = RAM(128)}
+  \item \emph{hiddenLayer1 = DenseLayer(RAM, 1024, ReLU)}
+  \item \emph{batchNorm1 = BatchNormalization(hiddenLayer1)}
+  \item \emph{hiddenLayer2 = DenseLayer(batchNorm1, 1024, ReLU)}
+  \item \emph{batchNorm2 = BatchNormalization(hiddenLayer2)}
+  \item \emph{outputLayer = DenseLayer(batchNorm2, numberOfActions, no activation)}
+  \end{enumerate}
 
 }
 
-\frame
-{
-  \frametitle{Construção de consultas}
+\frame{
+  \frametitle{Normalização do lote}
 
-  Temos duas opções:
-  
-  \begin{itemize}
-  \item \textbf{Extrair termos} que sejam considerados relevantes ao documento
-    inicial e utilizá-los em uma consulta a um sistema de
-    RI tradicional (\textit{mais à frente}).
-  \item \textbf{Utilizar o próprio documento} como ponto de partida em um
-    sistema baseado em CNG (\textit{Contextual Network Graphs})
-  \end{itemize}
+  Em aprendizagem de máquina, é usual aplicar mudança de escala dos
+  dados de entrada: intervalo limitado ou normalização.
+
+  A mesma idéia pode ser utilizada para cada camada da rede neural.
   
 }
 
-\frame
-{
-  \frametitle{Contextual Network Graphs}
-  
-  \begin{figure}[h]
-    \centering
-    \includegraphics [scale=0.5]{cachorro.png}
-  \end{figure}
+\frame{
+  \frametitle{Normalização do lote}
+
+  No treinamento, dados valores $x$ de um lote $B = \{x_1, \dots, m\}$, efetuamos:
+
+  \begin{enumerate}
+  \item $\mu_B \leftarrow \frac{1}{m} \sum_{i=1}^{m} x_i$
+  \item $\sigma^2_B \leftarrow \frac{1}{m} \sum_{i=1}^{m} (x_i - \mu_B)^2$
+  \item $\hat{x_i} \leftarrow \frac{x_i - \mu_B}{\sqrt{\sigma^2_B + \epsilon}}$
+  \item $y_i = \gamma \hat{x_i} + \beta$
+  \end{enumerate}
+
+  Durante o teste, podem ser utilizados os valores da média e
+  variância amostral de todas as entradas observadas até o momento
+  pela rede neural e seguir a partir do passo 3.
 
 }
 
+\frame{
+  \frametitle{Resultado}
 
-\frame
-{
-  \frametitle{Contextual Network Graphs}
-  
-  \begin{block}{Prós}
-  
-    \begin{itemize}
-    \item estrutura do grafo representa relacionamentos entre
-      documentos
-    \item baixo consumo de memória
-    \end{itemize}
-    
-  \end{block}
-
-  \begin{block}{Contras}
-    
-    \begin{itemize}
-    \item muitos parâmetros, não totalmente dominados
-    \item algoritmo original pode consumir muito tempo
-      \begin{itemize}
-      \item porém pode-se tentar reduzir as iterações
-      \end{itemize}
-    \item seu uso em expansão de consulta não foi tão bem sucedido até agora
-    \end{itemize}
-
-  \end{block}
+  Mostrar vídeo do modelo treinado.
 }
 
-
-\subsection{Cálculo de distância e agrupamentos}
-
-\frame 
-{ 
-  \frametitle{Cálculo de distância e agrupamentos} 
-
-  Nesse modelo, serão construídos agrupamentos de documentos
-  (\textit{clustering}) baseados em alguma métrica. 
-
-  A partir de um documento inicial, serão escolhidos outros
-  pertencentes ao mesmo agrupamento.
-
-}
-
-\frame
-{
-  \frametitle{\textit{Clustering}}
-
-  Em um \textit{clustering}, temos dois problemas principais: 
-
-  \begin{itemize}
-  \item Cálculo de distância entre elementos.
-  \item Metodologia de construção dos agrupamentos.
-  \end{itemize}
-  
-}
-
-\frame
-{
-  \frametitle{Distância}
-
-  Existem basicamente dois tipos de distâncias entre documentos:
-
-  \begin{itemize}
-  \item Baseada em freqüência de termos.
-  \item Baseada em semântica.
-  \end{itemize}
-  
-}
-
-\frame
-{
-  \frametitle{Distância baseada em freqüência}
-
-  Para cada termo $t$ num documento $d$ é calculado um peso baseado na
-  freqüência de $t$ em $d$ e na raridade de $t$ na
-  coleção. Representamos cada documento como um vetor desses pesos e a
-  distância entre dois documentos é a distância entre seus vetores.
-
-}
-
-\frame
-{
-  \frametitle{Distância semântica}
-
-  É calculada por meio de navegação em taxonomias, ou busca em
-  dicionários.
-
-  Faz uso de bases como \textit{WordNet} ou \textit{Wikipedia}.
-
-}
-
-\frame
-{
-  \frametitle{\textit{WordNet}}
-
-  A \textit{WordNet} é um dicionário em que substantivos, verbos,
-  adjetivos e advérbios são organizados em conjuntos de sinônimos,
-  cada um representando um conceito, que são interligados por meio de
-  relações semânticas.
-  
-}
-
-\frame
-{
-  \frametitle{Distância semântica}
-
-  % figuras lúdicas ou exemplos!!!!!!!!!  transformar em função
-  % ``matemática''. e.g. entrada - processamento - saída
-
-  Usualmente, são utilizadas as seguintes métricas:
-  
-  \begin{itemize}
-  \item Medida baseada em caminho: $f(length(c_1, c_2))$, onde
-    $length$ é o número de nós no menor caminho entre $c_1$ e $c_2$
-
-    % é uma função do número de arestas em uma taxonomia que separam
-    % duas palavras (conceitos) $w_1$ e $w_2$.
-    
-  \item Medida baseada em conteúdo de informação: $g(max_{c \in S(c_1,
-    c_2)}[-\log p(c)])$, onde $S(c_1, c_2)$ é o conceito que
-    generaliza $c_1$ e $c_2$, e $p(c)$ é a probabilidade de encontrar
-    o conceito $c$ no \textit{corpus}.
-    
-  \item Medida de sobreposição de texto: é uma medida do número de
-    termos comuns entre as definições de dois conceitos.
-    
-  \end{itemize}
-  
-}
-
-\frame
-{
-  \frametitle{Agrupamento em \textit{Clustering}}
-
-  Existem dois tipos:
-
-  \begin{itemize}
-  \item \textit{Flat clustering} -- cria os \textit{clusters} sem uma
-    estrutura explícita que relacione os \textit{clusters} entre si.
-
-  \item \textit{Clustering} hierárquico -- cria uma hierarquia, uma
-    estrutura mais informativa que o conjunto não estruturado obtido
-    no \textit{flat clustering}. 
-  \end{itemize}
-  
-}
-
-\frame
-{
-  \frametitle{\textit{Clustering}}
-
-  \begin{block}{Prós}
-    \begin{itemize}
-    \item É utilizado no Google News.
-
-    \item Já foi utilizado no Data Quality.
-     
-    \end{itemize}
-  \end{block}
-
-  \begin{block}{Contras}
-    \begin{itemize}
+\begin{frame}
+  \frametitle{References}
+  \footnotesize{
+    \begin{thebibliography}{99}
       
-    \item Depende da escolha de uma métrica e do agrupamento, o que
-      aumenta o número de variáveis para otimização do processo.
-
-    \end{itemize}
-  \end{block}
-
-}
-
-\frame
-{
-  \frametitle{Distância semântica}
-
-  \begin{block}{Prós}
-    \begin{itemize}
+    \bibitem[Sygnowski et al., 2016]{atari_ram} Jakub Sygnowsk and Henryk Michaelewski (2016)
+      \newblock Learning from the Memory of Atari 2600
       
-    \item Por usar relações semânticas entre conceitos, é capaz de
-      trazer resultados mais relevantes.
+    \bibitem[Mnih et al., 2103]{dqn} Volodymyr Mnih and
+      Koray Kavukcuoglu and
+      David Silver and
+      Alex Graves and
+      Ioannis Antonoglou and
+      Daan Wierstra and
+      Martin A. Riedmiller (2013)
+      \newblock Learning from the Memory of Atari 2600
       
-    \end{itemize}
-  \end{block}
-  
-  \begin{block}{Contras}
-    \begin{itemize}
-      
-    \item Definir os termos para comparação se análise for feita sobre
-      todo o artigo. Em caso de existência de \textit{tags}, é trivial.
+    \bibitem[Ioff et al., 2015]{batch_norm} Sergey Ioffe and Christian Szegedy (2015)
+      \newblock Batch Normalization: Accelerating Deep Network Training by Reducing
+      Internal Covariate Shift
 
-      
-    \item \textit{WordNet} só existe em inglês e não cobre assuntos
-      muito específicos.
-      
-    \end{itemize}
-  \end{block}
-
-}
-
-\frame
-{
-  \frametitle{Termos relevantes}
-
-  Seja para elaborar uma consulta a um sistema de RI, ou para calcular
-  distâncias, o uso de todos os termos presentes em um documento pode
-  trazer problemas de desempenho ou até mesmo de qualidade das
-  recomendações.
-
-}
-
-\frame
-{
-  \frametitle{Termos relevantes}
-
-  Algumas técnicas:
-
-  \begin{itemize}
-  \item Identificação de Sintagmas Nominais
-  \item Identificação de Entidades Nomeadas
-  \item Identificação de \textit{keywords}
-  \end{itemize}
-  
-}
+    \bibitem[Baird, 1995]{baird} Leemon Baird (1995)
+      \newblock Residual algorithms: Reinforcement learning with function approximation    
+            
+    \end{thebibliography}
+        
+  }
+\end{frame}
 
 
-\frame
-{
-  \frametitle{Termos relevantes}
+\begin{frame}[t, allowframebreaks]
+\frametitle{References}
+\bibliographystyle{amsalpha}
+\bibliography{bibfile}
+\end{frame}
 
-  Algumas técnicas:
-
-
-  \begin{itemize}
-  \item \textbf{Identificação de Sintagmas Nominais}
-  \item Identificação de Entidades Nomeadas
-  \item Identificação de \textit{keywords}
-  \end{itemize}
-  
-   A bola de $<$SER HUMANO$>$Vitorino Ramos$<$/SER$>$ ( na foto ) é a
-   materialização de um mapa cognitivo de um formigueiro artificial .
-
-}
-
-\frame
-{
-  \frametitle{Termos relevantes}
-
-  Algumas técnicas:
-
-
-  \begin{itemize}
-  \item Identificação de Sintagmas Nominais    
-  \item \textbf{Identificação de Entidades Nomeadas}
-  \item Identificação de \textit{keywords}
-  \end{itemize}
-
-  A \{ [ bola ] de [ Vitorino ] [ Ramos ] \} ( em \{ a [ foto ] \}
-  ) é \{ a [ materialização ] de um [ mapa ] cognitivo de um [
-      formigueiro ] artificial \} .
-  
-}
-
-\frame
-{
-  \frametitle{Termos relevantes}
-  Algumas técnicas:
-
-
-  \begin{itemize}
-  \item Identificação de Sintagmas Nominais    
-  \item Identificação de Entidades Nomeadas
-  \item \textbf{Identificação de \textit{keywords}}
-  \end{itemize}
-
-  A bola de [ Vitorino ] Ramos ( na foto ) é a [ materialização ] de
-  um mapa [ cognitivo ] de um [ formigueiro ] artificial .
-  \\
-
-}
-
-\frame
-{
-  \frametitle{Identificação de Sintagmas Nominais}
-
-  Faz uso de ferramentas de \textit{POS tagging} e TBL para
-  identificação de Sintagmas Nominais em textos.
-	
-}
-
-\frame
-{
-  \frametitle{Identificação de Sintagmas Nominais}
-
-  \begin{block}{Prós}
-    
-    \begin{itemize}
-    \item Já foi utilizado aqui na upLexis (para o CLEF)
-    \item Aplicação de SN em expansão de consulta traz bons resultados
-    \item Os sintagmas (ou pelo menos os substantivos) representam boa
-      parte da informação de um documento
-    \end{itemize}
-    
-  \end{block}
-  
-  \begin{block}{Contras}
-  
-    \begin{itemize}
-    \item Faz uso de aprendizado de máquina, logo podem haver erros de
-      identificação
-    \item Realiza marcações no texto (pode ser necessário manter duas
-      versões de cada documento)
-    \end{itemize}
-  
-  \end{block}
-
-}
-
-\frame
-{
-  \frametitle{Identificação de Entidades Nomeadas}
-  
-  A ``Linguateca'' desenvolveu uma ferramenta denominada SIEMÊS para
-  isso, além de um repositório de entidades nomeadas classificadas, o
-  REPENTINO.
-    
-}
-
-\frame
-{
-  \frametitle{Identificação de Entidades Nomeadas}
-  
-  \begin{block}{Prós}
-    
-    \begin{itemize}
-    \item As entidades nomeadas que ocorrem em um documento tendem a
-      ser a parte mais importante do mesmo.
-    \end{itemize}
-    
-  \end{block}
-  
-  \begin{block}{Contras}
-  
-    \begin{itemize}
-    \item Envolve regras fixas e uma base de categorias em constante
-      manutenção, portanto podem haver erros de identificação e de
-      classificação
-    \item Realiza marcações no texto (pode ser necessário manter duas
-      versões de cada documento)
-    \end{itemize}
-  \end{block}
-  
-}
-
-
-\frame
-{
-  \frametitle{Identificação de \textit{keywords}}
-
-  Podemos utilizar \textit{tf-idf} e escolher os $n$ primeiros termos
-  como os mais relevantes do documento.
-}
-
-\frame
-{
-  \frametitle{Termos relevantes}
-
-  Podemos também utilizar \textit{tags} definidas pelos usuários ou
-  pelo autor para representar um documento.
-  
-
-  \textit{Tags} podem ser usadas como medida de distância entre
-  documentos, calculada pela quantidade de sobreposição de
-  \textit{tags}.
-
-}
-
-\frame
-{
-  \frametitle{LSA}
-
-  Geralmente, uma coleção de documentos é tratada como sendo um espaço
-  determinado por uma matriz Termos-por-Documentos, onde cada elemento
-  corresponde ao peso de um termo em um documento. 
-
-}
-
-\frame
-{
-  \frametitle{LSA}
-
-  Latent Semantic Analysis (LSA ou Análise Semântica Latente) é uma
-  forma de decompor essa matriz Termos-por-Documentos, permitindo a
-  redução da dimensionalidade desta, mas preservando o máximo possível
-  de informação da matriz original.
-
-}
-
-\frame
-{
-  \frametitle{LSA}
-
-  A decomposição obtida (normalmente através de \textit{Singular Value
-    Decomposition}), consiste em 3 matrizes; a primeira define um
-  espaço Termos-por-Conceitos; a segunda define um ``peso'' para cada
-  conceito; e a terceira define um espaço Conceitos-por-Documentos.
-
-  Uma forma de identificar documentos recomendados é, dado o documento
-  original, determinar quais estão mais próximos a ele no espaço
-  Conceitos-por-Documentos.
-
-}
-
-\frame
-{
-  \frametitle{LSA}
-
-  \begin{block}{Prós}
-
-    \begin{itemize}
-    \item Diminui a dimensão do espaço a ser trabalhado
-    \item Permite determinar similaridade entre documentos em termos de ``conceitos''
-    \end{itemize}
-    
-  \end{block}
-  
-  \begin{block}{Contras}
-    
-    \begin{itemize}
-    \item Matrizes envolvidas deixam de ser esparsas, e portanto consomem mais memória
-    \item Cálculo consome muito processamento % O (n*n*m) , O (n*m*m)
-    \item Difícil de implementar
-    \end{itemize}
-    
-  \end{block}
-
-}
-
-\frame
-{
-
+\frame{
+  \frametitle{Repositório}
   \begin{center}
-    Fim
+    https://github.com/ricardoy/atari\_rl
+  \end{center}
+}
+
+\frame {
+  \frametitle{Fim}
+      
+  \begin{center}
+    Obrigado!
   \end{center}
 
 }

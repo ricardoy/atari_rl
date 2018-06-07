@@ -1,5 +1,12 @@
 \BOOKMARK [2][]{Outline0.1}{Introdu\347\343o}{}% 1
-\BOOKMARK [2][]{Outline0.2}{Players}{}% 2
-\BOOKMARK [2][]{Outline0.3}{Modelos de recomenda\347\343o}{}% 3
-\BOOKMARK [3][]{Outline0.3.1.6}{Constru\347\343o de consultas}{Outline0.3}% 4
-\BOOKMARK [3][]{Outline0.3.2.10}{C\341lculo de dist\342ncia e agrupamentos}{Outline0.3}% 5
+\BOOKMARK [3][]{Outline0.1.1.3}{Objetivo}{Outline0.1}% 2
+\BOOKMARK [3][]{Outline0.1.2.4}{Q-Learning}{Outline0.1}% 3
+\BOOKMARK [3][]{Outline0.1.3.7}{Problema}{Outline0.1}% 4
+\BOOKMARK [3][]{Outline0.1.4.8}{Solu\347\343o}{Outline0.1}% 5
+\BOOKMARK [2][]{Outline0.2}{Redes Neurais}{}% 6
+\BOOKMARK [3][]{Outline0.2.1.10}{Dificuldade}{Outline0.2}% 7
+\BOOKMARK [3][]{Outline0.2.2.11}{Propostas de melhorias}{Outline0.2}% 8
+\BOOKMARK [3][]{Outline0.2.3.12}{Repeti\347\343o de experi\352ncia}{Outline0.2}% 9
+\BOOKMARK [2][]{Outline0.3}{Solu\347\343o implementada}{}% 10
+\BOOKMARK [3][]{Outline0.3.1.14}{Descri\347\343o do agente}{Outline0.3}% 11
+\BOOKMARK [3][]{Outline0.3.2.16}{Implementa\347\343o}{Outline0.3}% 12
