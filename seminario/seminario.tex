@@ -144,16 +144,23 @@
   \frametitle{Proposta de melhoria}
 
   \begin{itemize}
-    \item Em \cite{dqn}, foi proposto um modelo de memória de repetição de
-      experiências que, em conjunto com aprendizagem em lote numa rede
-      neural convolucional, alcançou o estado da arte em 7 jogos de Atari
-      2600.
-    \item Falar de \emph{freeze target}
+    \item Repetição de experiências
+    \item Fixar rede neural alvo
   \end{itemize}
 
 }
 
 \subsection{Repetição de experiência}
+
+\frame{
+  \frametitle{Repetição de experiência}
+
+  Em \cite{dqn}, foi proposto um modelo de memória de repetição de
+  experiências que, em conjunto com aprendizagem em lote numa rede
+  neural convolucional, alcançou o estado da arte em 7 jogos de Atari
+  2600.
+
+}
 
 \frame{
   \frametitle{Repetição de experiência}
@@ -176,6 +183,25 @@
     anteriormente observadas, tornando a distribuição dos
     comportamentos de entrada menos enviesados.
   \end{itemize}
+}
+
+\frame{
+  \frametitle{Fixar rede neural alvo}
+
+  Para evitar oscilações, \cite{dqn2} propôs manter 2 parametrizações
+  de rede neural em memória: $\theta$ e $\theta^{-}$.
+
+  \begin{itemize}
+  \item Os valores alvo do Q-Learning são calculados utilizando a parametrização fixa $\theta^{-}$:
+    \begin{equation*}
+      r + \gamma \max_{a'} Q(s', a', \theta^{-})
+    \end{equation*}
+  \item Em cada iteração do treinamento, a parametrização $\theta$ é
+    atualizada.
+  \item Periodicamente, atualizar a parametrização fixa: $\theta^{-}
+    \leftarrow \theta$.
+  \end{itemize}
+
 }
 
 \section{Solução implementada}
@@ -210,12 +236,13 @@
 \frame{
   \frametitle{Estrutura da solução}
   
-  \begin{enumerate}
+  \begin{itemize}
   \item Dados de entrada: RAM do Atari 2600 (trivia: qual o tamanho?).
   \item Rede neural com ativação não-linear como aproximação para
     $Q^{*}(s,a)$.
   \item Atualizações em lote com repetição de experiência.
-  \end{enumerate}
+  \item Fixar rede neural alvo.
+  \end{itemize}
 }
 
 \frame{ 
@@ -266,6 +293,9 @@
   Mostrar vídeo do modelo treinado.
 }
 
+
+
+
 \begin{frame}
   \frametitle{References}
   \footnotesize{
@@ -288,19 +318,37 @@
       Internal Covariate Shift
 
     \bibitem[Baird, 1995]{baird} Leemon Baird (1995)
-      \newblock Residual algorithms: Reinforcement learning with function approximation    
-            
+      \newblock Residual algorithms: Reinforcement learning with function approximation
+
+     
     \end{thebibliography}
         
   }
 \end{frame}
 
 
-\begin{frame}[t, allowframebreaks]
-\frametitle{References}
-\bibliographystyle{amsalpha}
-\bibliography{bibfile}
+\begin{frame}
+  \frametitle{References}
+  \footnotesize{
+    \begin{thebibliography}{99}
+
+
+    \bibitem[Mnih et al., 2015]{dqn2} Volodymyr Mnih, Koray
+      Kavukcuoglu, David Silver, Andrei A. Rusu, Joel Veness, Marc
+      G. Bellemare, Alex Graves, Martin Riedmiller, Andreas
+      K. Fidjeland, Georg Ostrovski, Stig Petersen, Charles Beattie,
+      Amir Sadik, Ioannis Antonoglou, Helen King, Dharshan Kumaran,
+      Daan Wierstra, Shane Legg, Demis Hassabis
+      
+      \newblock Human-level control through deep reinforcement learning
+
+      
+    \end{thebibliography}
+        
+  }
 \end{frame}
+
+
 
 \frame{
   \frametitle{Repositório}

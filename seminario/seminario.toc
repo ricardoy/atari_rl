@@ -9,6 +9,6 @@
 \beamer@subsectionintoc {2}{1}{Dificuldade}{10}{0}{2}
 \beamer@subsectionintoc {2}{2}{Propostas de melhorias}{11}{0}{2}
 \beamer@subsectionintoc {2}{3}{Repeti\c c\~ao de experi\^encia}{12}{0}{2}
-\beamer@sectionintoc {3}{Solu\c c\~ao implementada}{14}{0}{3}
-\beamer@subsectionintoc {3}{1}{Descri\c c\~ao do agente}{14}{0}{3}
-\beamer@subsectionintoc {3}{2}{Implementa\c c\~ao}{16}{0}{3}
+\beamer@sectionintoc {3}{Solu\c c\~ao implementada}{16}{0}{3}
+\beamer@subsectionintoc {3}{1}{Descri\c c\~ao do agente}{16}{0}{3}
+\beamer@subsectionintoc {3}{2}{Implementa\c c\~ao}{18}{0}{3}
